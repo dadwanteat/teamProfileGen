@@ -10,7 +10,27 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
 
+const inquirer = require("inquirer");
 
+// TODO: Write code to define and export the Employee class
+inquirer
+    .prompt([{
+            name: "employee_name",
+            type: "input",
+            message: "What is your full name?"
+        },
+        {
+            name: "employee_id",
+            type: "number",
+            message: "What is your Employee ID number?"
+        },
+        {
+            name: "employee_email",
+            type: "email",
+            message: "What is your eamil address?"
+        },
+        
+    ])
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
 

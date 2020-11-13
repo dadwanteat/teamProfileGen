@@ -10,97 +10,132 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
 
-
-
 function prompt() {
-    // Write code to use inquirer to gather information about the development team members,
-// and to create objects for each team member (using the correct classes as blueprints!)
-inquirer
-.prompt([{
+  // Write code to use inquirer to gather information about the development team members,
+  // and to create objects for each team member (using the correct classes as blueprints!)
+  return inquirer
+    .prompt([
+      {
         name: "employee_name",
         type: "input",
-        message: "What is your full name?"
-    },
-    {
+        message: "What is your full name?",
+      },
+      {
         name: "employee_id",
         type: "number",
-        message: "What is your employee ID number?"
-    },
-    {
+        message: "What is your employee ID number?",
+      },
+      {
         name: "employee_email",
         type: "email",
-        message: "What is your email address?"
-    },
-    {
+        message: "What is your email address?",
+      },
+      {
         name: "employee_role",
         type: "list",
         message: "What is your role as an employee?",
-        choices: ["Manager", "Engineer", "Intern"]
-    },
-    {
+        choices: ["Manager", "Engineer", "Intern"],
+      },
+      {
         name: "office_number",
         type: "number",
         message: "What is your office number?",
-        when: function(answers) {
-            if (answers.employee_role == "Manager"){
-                return true
-            }else{
-                return false
-            }
-        }
-    },
-    {
+        when: function (answers) {
+          if (answers.employee_role == "Manager") {
+            return true;
+          } else {
+            return false;
+          }
+        },
+      },
+      {
         name: "employee_github",
         type: "input",
         message: "What is your github username?",
-        when: function(answers) {
-            if (answers.employee_role == "Engineer"){
-                return true
-            }else{
-                return false
-            }
-        }
-    },
-    {
+        when: function (answers) {
+          if (answers.employee_role == "Engineer") {
+            return true;
+          } else {
+            return false;
+          }
+        },
+      },
+      {
         name: "school_name",
         type: "input",
         message: "What is the name of your school?",
-        when: function(answers) {
-            if (answers.employee_role == "Intern"){
-                return true
-            }else{
-                return false
-            }
-        }
-    },
-    {
+        when: function (answers) {
+          if (answers.employee_role == "Intern") {
+            return true;
+          } else {
+            return false;
+          }
+        },
+      },
+      {
         name: "another_employee",
         type: "list",
         message: "Would you like to add another employee?",
         choices: ["Add another employee", "No thank you, my team is complete!"],
-        
-    }
-    
-])
+      },
+    ])
 
-.then(answers => {
-    if(answers.another_employee == "Add another employee") {
-        prompt()
-    }else{
-    let manager = new Manager(answers.employee_name, answers.employee_id, answers.employee_email, answers.office_number);
-    let engineer = new Engineer(answers.employee_name, answers.employee_id, answers.employee_email, answers.employee_github);
-    let intern = new Intern(answers.employee_name, answers.employee_id, answers.employee_email, answers.school_name);
-    let html = render([manager, engineers, interns])
-    
-    // 
-    fs.writeFile(outputPath, html, function(err, data) {
-        if (err) throw err;
-        console.log('File Saved!');
+    .then((answers) => {
+      console.log(answers);
+      return answers
+    }).catch(error => {
+      console.error(error)
     });
-}})
 }
-prompt()
 
+function getEmployeeObject(answers) {
+  switch (answers.employee_role) {
+    case "Manager":
+      return new Manager(
+        answers.employee_name,
+        answers.employee_id,
+        answers.employee_email,
+        answers.office_number
+      );
+    case "Engineer":
+      return new Engineer(
+        answers.employee_name,
+        answers.employee_id,
+        answers.employee_email,
+        answers.employee_github
+      );
+    case "Intern":
+      return new Intern(
+        answers.employee_name,
+        answers.employee_id,
+        answers.employee_email,
+        answers.school_name
+      );
+    default:
+      return null;
+  }
+}
+
+async function main() {
+  const employees = [];
+  let answers = await prompt();
+
+  employees.push(getEmployeeObject(answers));
+  while (answers.another_employee == "Add another employee") {
+    answers = await prompt();
+    employees.push(getEmployeeObject(answers));
+  }
+
+  const html = render(employees);
+
+  // TODO: Ensure the path exists and folder that will contain the output file.
+  fs.writeFile(outputPath, html, function (err, _) {
+    if (err) throw err;
+    console.log("File Saved!");
+  });
+}
+
+main()
 
 // After the user has input all employees desired, call the `render` function (required
 // above) and pass in an array containing all employee objects; the `render` function will
